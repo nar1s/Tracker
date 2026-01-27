@@ -318,14 +318,11 @@ final class CreateTrackerViewController: UIViewController {
             return
         }
         
-        // Проверяем длину
         if text.count > 38 {
-            // Обрезаем до 38 символов
             let truncated = String(text.prefix(38))
             nameTextField.text = truncated
             trackerName = truncated
-            
-            // Показываем ошибку
+
             showErrorLabel()
         } else {
             errorLabel.isHidden = true
@@ -335,14 +332,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private func showErrorLabel() {
         errorLabel.isHidden = false
-        
-        // Отменяем предыдущий таймер, если есть
         errorLabelTimer?.invalidate()
-        
-        // Скрываем через 2 секунды
-        errorLabelTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
-            self?.errorLabel.isHidden = true
-        }
     }
     
     // MARK: - Validation
