@@ -144,7 +144,6 @@ extension ScheduleSelectionViewController: UITableViewDataSource {
             action: #selector(switchValueChanged(_:))
         )
         
-        // Скругляем углы у первой и последней ячейки
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -180,7 +179,7 @@ private final class WeekdayCell: UITableViewCell {
     
     private let switchControl: UISwitch = {
         let switchControl = UISwitch()
-        switchControl.onTintColor = UIColor(resource: .ypBlue)
+        switchControl.onTintColor = .systemBlue
         switchControl.translatesAutoresizingMaskIntoConstraints = false
         return switchControl
     }()

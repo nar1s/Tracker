@@ -73,62 +73,6 @@ final class TrackersListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
-        let tracker1 = Tracker(
-            id: UUID(),
-            name: "Утренняя пробежка",
-            color: TrackerColor.color1.colorName,
-            emoji: "🏃",
-            schedule: Schedule(weekdays: [.monday, .wednesday, .friday])
-        )
-
-        let tracker2 = Tracker(
-            id: UUID(),
-            name: "Читать книгу перед сном",
-            color: TrackerColor.color5.colorName,
-            emoji: "📚",
-            schedule: Schedule(weekdays: [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday])
-        )
-
-        let tracker3 = Tracker(
-            id: UUID(),
-            name: "Медитация",
-            color: TrackerColor.color10.colorName,
-            emoji: "🧘‍♂️",
-            schedule: Schedule(weekdays: [.tuesday, .thursday, .saturday])
-        )
-        
-        let tracker4 = Tracker(
-            id: UUID(),
-            name: "Пить воду",
-            color: TrackerColor.color3.colorName,
-            emoji: "💧",
-            schedule: Schedule(weekdays: [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday])
-        )
-        
-        let tracker5 = Tracker(
-            id: UUID(),
-            name: "Изучать Swift",
-            color: TrackerColor.color12.colorName,
-            emoji: "💻",
-            schedule: Schedule(weekdays: [.monday, .tuesday, .wednesday, .thursday, .friday])
-        )
-        
-        let tracker6 = Tracker(
-            id: UUID(),
-            name: "Готовить ужин",
-            color: TrackerColor.color7.colorName,
-            emoji: "🍳",
-            schedule: Schedule(weekdays: [.monday, .wednesday, .friday, .sunday])
-        )
-
-        categories = [
-            TrackerCategory(name: "Спорт", trackers: [tracker1, tracker3]),
-            TrackerCategory(name: "Обучение", trackers: [tracker2, tracker5]),
-            TrackerCategory(name: "Здоровье", trackers: [tracker4]),
-            TrackerCategory(name: "Быт", trackers: [tracker6])
-        ]
-
         updateVisibleCategories()
         updateEmptyState()
         collectionView.reloadData()
@@ -292,7 +236,10 @@ final class TrackersListViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func addTrackerTapped() {
-        print("Add tracker tapped")
+        let vc = NewTrackerViewController()
+        vc.delegate = self
+        vc.modalPresentationStyle = .pageSheet
+        present(vc, animated: true)
     }
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
@@ -405,4 +352,15 @@ private extension TrackersListViewController {
         collectionView.reloadItems(at: [indexPath])
     }
 }
+
+// MARK: - CreateTrackerDelegate
+extension TrackersListViewController: CreateTrackerDelegate {
+    func didCreateTracker(_ tracker: Tracker, category: String) {
+        addTracker(tracker, to: category)
+        updateVisibleCategories()
+        updateEmptyState()
+        collectionView.reloadData()
+    }
+}
+
 
