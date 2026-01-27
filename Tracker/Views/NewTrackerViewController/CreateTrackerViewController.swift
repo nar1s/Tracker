@@ -31,6 +31,8 @@ final class CreateTrackerViewController: UIViewController {
     
     weak var delegate: CreateTrackerDelegate?
     
+    private var errorLabelTimer: Timer?
+    
     // MARK: - Data Sources
     
     private enum SettingsRow {
@@ -95,6 +97,17 @@ final class CreateTrackerViewController: UIViewController {
         
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
+    }()
+    
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Ограничение 38 символов"
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = UIColor(resource: .ypRed)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
     }()
     
     private lazy var settingsTableView: UITableView = {
@@ -171,6 +184,7 @@ final class CreateTrackerViewController: UIViewController {
     
     deinit {
         removeKeyboardObservers()
+        errorLabelTimer?.invalidate()
     }
     
     // MARK: - UI Setup
@@ -183,6 +197,7 @@ final class CreateTrackerViewController: UIViewController {
         scrollView.addSubview(contentView)
         
         contentView.addSubview(nameTextField)
+        contentView.addSubview(errorLabel)
         contentView.addSubview(settingsTableView)
         
         view.addSubview(buttonsStackView)
@@ -213,7 +228,10 @@ final class CreateTrackerViewController: UIViewController {
             nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
             
-            settingsTableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
+            errorLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
+            errorLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            
+            settingsTableView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
             settingsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             settingsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             settingsTableView.heightAnchor.constraint(equalToConstant: tableHeight),
@@ -294,7 +312,37 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     @objc private func nameTextFieldChanged() {
-        trackerName = nameTextField.text ?? ""
+        guard let text = nameTextField.text else {
+            trackerName = ""
+            errorLabel.isHidden = true
+            return
+        }
+        
+        // Проверяем длину
+        if text.count > 38 {
+            // Обрезаем до 38 символов
+            let truncated = String(text.prefix(38))
+            nameTextField.text = truncated
+            trackerName = truncated
+            
+            // Показываем ошибку
+            showErrorLabel()
+        } else {
+            errorLabel.isHidden = true
+            trackerName = text
+        }
+    }
+    
+    private func showErrorLabel() {
+        errorLabel.isHidden = false
+        
+        // Отменяем предыдущий таймер, если есть
+        errorLabelTimer?.invalidate()
+        
+        // Скрываем через 2 секунды
+        errorLabelTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+            self?.errorLabel.isHidden = true
+        }
     }
     
     // MARK: - Validation
