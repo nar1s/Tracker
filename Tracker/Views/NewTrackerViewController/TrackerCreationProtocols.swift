@@ -34,31 +34,3 @@ protocol CategorySelectionDelegate: AnyObject {
 protocol ScheduleSelectionDelegate: AnyObject {
     func didSelectSchedule(_ schedule: Set<Weekday>)
 }
-
-// MARK: - Weekday Extension
-
-extension Weekday {
-    var fullName: String {
-        switch self {
-        case .sunday: return "Воскресенье"
-        case .monday: return "Понедельник"
-        case .tuesday: return "Вторник"
-        case .wednesday: return "Среда"
-        case .thursday: return "Четверг"
-        case .friday: return "Пятница"
-        case .saturday: return "Суббота"
-        }
-    }
-    
-    var shortName: String {
-        switch self {
-        case .sunday: return "Вс"
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        }
-    }
-}

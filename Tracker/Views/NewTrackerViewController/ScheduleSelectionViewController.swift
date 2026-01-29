@@ -131,12 +131,12 @@ extension ScheduleSelectionViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WeekdayCell", for: indexPath) as! WeekdayCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "WeekdayCell", for: indexPath) as? WeekdayCell
         
         let weekday = allDays[indexPath.row]
         let isSelected = selectedDays.contains(weekday)
         
-        cell.configure(
+        cell?.configure(
             title: weekday.fullName,
             isOn: isSelected,
             tag: indexPath.row,
@@ -145,14 +145,17 @@ extension ScheduleSelectionViewController: UITableViewDataSource {
         )
         
         if indexPath.row == 0 {
-            cell.layer.cornerRadius = 16
-            cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            cell?.layer.cornerRadius = 16
+            cell?.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         } else if indexPath.row == allDays.count - 1 {
-            cell.layer.cornerRadius = 16
-            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+            cell?.layer.cornerRadius = 16
+            cell?.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell?.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
         }
         
+        guard let cell else {
+            fatalError("Unwrapped cell is nil")
+        }
         return cell
     }
 }

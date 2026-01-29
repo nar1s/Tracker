@@ -26,6 +26,8 @@ final class CreateTrackerViewController: UIViewController {
         }
     }
     
+    private let maxNameLength = 38
+    
     private let selectedColor: String = TrackerColor.color1.colorName
     private let selectedEmoji: String = "🏃"
     
@@ -170,8 +172,9 @@ final class CreateTrackerViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Lifecycle
@@ -294,7 +297,7 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
-        guard isFormValid() else { return }
+        guard isFormValid else { return }
         
         let schedule: Schedule? = trackerType == .habit ? Schedule(weekdays: selectedSchedule) : nil
         
@@ -318,11 +321,11 @@ final class CreateTrackerViewController: UIViewController {
             return
         }
         
-        if text.count > 38 {
+        if text.count > maxNameLength {
             let truncated = String(text.prefix(38))
             nameTextField.text = truncated
             trackerName = truncated
-
+            
             showErrorLabel()
         } else {
             errorLabel.isHidden = true
@@ -337,13 +340,13 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Validation
     
-    private func isFormValid() -> Bool {
+    private var isFormValid: Bool {
         !trackerName.isEmpty &&
         (trackerType == .irregular || !selectedSchedule.isEmpty)
     }
     
     private func updateCreateButtonState() {
-        let isValid = isFormValid()
+        let isValid = isFormValid
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid ? UIColor(resource: .ypBlack) : UIColor(resource: .ypGray)
     }

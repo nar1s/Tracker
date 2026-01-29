@@ -263,23 +263,25 @@ extension TrackersListViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell", for: indexPath) as! TrackerCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell", for: indexPath) as? TrackerCollectionViewCell
         
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
         let isCompleted = isTrackerCompleted(trackerId: tracker.id, on: currentDate)
         let completedDays = completionCount(for: tracker.id)
         
-        cell.configure(with: tracker, isCompleted: isCompleted, completedDays: completedDays)
+        cell?.configure(with: tracker, isCompleted: isCompleted, completedDays: completedDays)
         
-        // Проверяем, можно ли отметить трекер (не в будущем)
         let isFutureDate = Calendar.current.startOfDay(for: currentDate) > Calendar.current.startOfDay(for: Date())
-        cell.setCompleteButtonEnabled(!isFutureDate)
+        cell?.setCompleteButtonEnabled(!isFutureDate)
         
-        cell.onCompleteButtonTapped = { [weak self] in
+        cell?.onCompleteButtonTapped = { [weak self] in
             guard let self = self else { return }
             self.handleTrackerCompletion(at: indexPath)
         }
         
+        guard let cell else {
+            fatalError("Unwrapped cell is nil")
+        }
         return cell
     }
     
