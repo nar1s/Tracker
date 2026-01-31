@@ -210,7 +210,6 @@ final class TrackersListViewController: UIViewController {
             .foregroundColor: UIColor(resource: .ypBlack)
         ]
         
-        // Создаём и добавляем кнопку напрямую в navigation bar
         guard let navigationBar = navigationController?.navigationBar else { return }
         
         let addTrackerButton = UIButton(type: .system)
