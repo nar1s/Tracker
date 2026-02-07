@@ -6,16 +6,16 @@
 //
 
 import UIKit
-
+    
 final class TrackersListViewController: UIViewController {
     
     // MARK: - Properties
     
     private var currentDate: Date = Date()
     private var categories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
     private var visibleCategories: [TrackerCategory] = []
     
+    private let dataStore = DataStore.shared
     
     // MARK: - UI
     
@@ -73,12 +73,22 @@ final class TrackersListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        loadCategories()
         updateVisibleCategories()
         updateEmptyState()
         collectionView.reloadData()
     }
 
     // MARK: - Private Methods
+    
+    private func loadCategories() {
+        do {
+            categories = try dataStore.fetchAllCategories()
+        } catch {
+            print("Failed to load categories: \(error)")
+            categories = []
+        }
+    }
     
     private func updateVisibleCategories() {
         let calendar = Calendar.current
@@ -112,60 +122,46 @@ final class TrackersListViewController: UIViewController {
     }
     
     private func addTracker(_ tracker: Tracker, to categoryTitle: String) {
-        var updatedCategories: [TrackerCategory] = []
-        var categoryFound = false
-        
-        for category in categories {
-            if category.name == categoryTitle {
-                var updatedTrackers = category.trackers
-                updatedTrackers.append(tracker)
-                
-                let updatedCategory = TrackerCategory(
-                    name: category.name,
-                    trackers: updatedTrackers
-                )
-                updatedCategories.append(updatedCategory)
-                categoryFound = true
-            } else {
-                updatedCategories.append(category)
-            }
+        do {
+            try dataStore.addTracker(tracker, to: categoryTitle)
+            loadCategories()
+        } catch {
+            print("Failed to add tracker: \(error)")
         }
-        
-        if !categoryFound {
-            let newCategory = TrackerCategory(
-                name: categoryTitle,
-                trackers: [tracker]
-            )
-            updatedCategories.append(newCategory)
-        }
-        
-        categories = updatedCategories
     }
     
     private func completeTracker(with trackerId: UUID, on date: Date) {
-        let record = TrackerRecord(trackerId: trackerId, date: date)
-        
-        guard !completedTrackers.contains(where: { $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: date) }) else {
-            return
+        do {
+            try dataStore.completeTracker(id: trackerId, date: date)
+        } catch {
+            print("Failed to complete tracker: \(error)")
         }
-        
-        completedTrackers = completedTrackers + [record]
     }
     
     private func uncompleteTracker(with trackerId: UUID, on date: Date) {
-        completedTrackers = completedTrackers.filter { record in
-            !(record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: date))
+        do {
+            try dataStore.uncompleteTracker(id: trackerId, date: date)
+        } catch {
+            print("Failed to uncomplete tracker: \(error)")
         }
     }
     
     private func isTrackerCompleted(trackerId: UUID, on date: Date) -> Bool {
-        completedTrackers.contains { record in
-            record.trackerId == trackerId && Calendar.current.isDate(record.date, inSameDayAs: date)
+        do {
+            return try dataStore.isTrackerCompleted(id: trackerId, date: date)
+        } catch {
+            print("Failed to check tracker completion: \(error)")
+            return false
         }
     }
     
     private func completionCount(for trackerId: UUID) -> Int {
-        completedTrackers.filter { $0.trackerId == trackerId }.count
+        do {
+            return try dataStore.getCompletionCount(for: trackerId)
+        } catch {
+            print("Failed to get completion count: \(error)")
+            return 0
+        }
     }
     
     // MARK: - UI Setup
@@ -243,6 +239,7 @@ final class TrackersListViewController: UIViewController {
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
+        loadCategories()
         updateVisibleCategories()
         updateEmptyState()
         collectionView.reloadData()
@@ -357,11 +354,12 @@ private extension TrackersListViewController {
 // MARK: - CreateTrackerDelegate
 extension TrackersListViewController: CreateTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
-        addTracker(tracker, to: category)
+        // Трекер уже сохранен в CreateTrackerViewController через dataStore
+        // Здесь просто обновляем UI
+        loadCategories()
         updateVisibleCategories()
         updateEmptyState()
         collectionView.reloadData()
     }
 }
-
 

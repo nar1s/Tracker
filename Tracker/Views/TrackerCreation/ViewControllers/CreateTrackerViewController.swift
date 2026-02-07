@@ -12,6 +12,7 @@ final class CreateTrackerViewController: UIViewController {
     // MARK: - Properties
     
     private let trackerType: TrackerType
+    private let dataStore: DataStore
     
     private var trackerName: String = "" {
         didSet { updateCreateButtonState() }
@@ -260,8 +261,9 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(trackerType: TrackerType) {
+    init(trackerType: TrackerType, dataStore: DataStore = .shared) {
         self.trackerType = trackerType
+        self.dataStore = dataStore
         self.selectedColor = ""
         self.selectedEmoji = ""
         super.init(nibName: nil, bundle: nil)
@@ -415,8 +417,15 @@ final class CreateTrackerViewController: UIViewController {
             schedule: schedule
         )
         
-        view.window?.rootViewController?.dismiss(animated: true) {
-            self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+        do {
+            try dataStore.addTracker(tracker, to: selectedCategory)
+            
+            view.window?.rootViewController?.dismiss(animated: true) {
+                self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+            }
+        } catch {
+            // Показываем ошибку пользователю
+            showError(error)
         }
     }
     
@@ -497,6 +506,16 @@ final class CreateTrackerViewController: UIViewController {
         
         let sortedDays = selectedSchedule.sorted { $0.rawValue < $1.rawValue }
         return sortedDays.map { $0.shortName }.joined(separator: ", ")
+    }
+    
+    private func showError(_ error: Error) {
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: "Не удалось создать трекер: \(error.localizedDescription)",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 
