@@ -9,6 +9,14 @@ import UIKit
 
 class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
 
+    init() {
+        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     private lazy var pages: [UIViewController] = [
         makePage(image: ._1, text: "Отслеживайте только\nто, что хотите"),
         makePage(image: ._2, text: "Даже если это\nне литры воды и йога")

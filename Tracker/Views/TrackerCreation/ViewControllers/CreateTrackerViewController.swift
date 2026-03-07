@@ -18,7 +18,12 @@ final class CreateTrackerViewController: UIViewController {
         didSet { updateCreateButtonState() }
     }
     
-    let selectedCategory: String = "Важное"
+    var selectedCategory: String = "" {
+        didSet {
+            settingsTableView.reloadData()
+            updateCreateButtonState()
+        }
+    }
     
     var selectedSchedule: Set<Weekday> = [] {
         didSet {
@@ -471,6 +476,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private var isFormValid: Bool {
         !trackerName.isEmpty &&
+        !selectedCategory.isEmpty &&
         !selectedEmoji.isEmpty &&
         !selectedColor.isEmpty &&
         (trackerType == .irregular || !selectedSchedule.isEmpty)
@@ -485,7 +491,14 @@ final class CreateTrackerViewController: UIViewController {
     // MARK: - Navigation
     
     func openCategorySelection() {
-        print("Категория: \(selectedCategory)")
+        let viewModel = CategorySelectionViewModel(
+            categoryStore: dataStore.categoryStore,
+            selectedCategory: selectedCategory.isEmpty ? nil : selectedCategory
+        )
+        let vc = CategorySelectionViewController(viewModel: viewModel)
+        vc.delegate = self
+        vc.modalPresentationStyle = .pageSheet
+        present(vc, animated: true)
     }
     
     func openScheduleSelection() {

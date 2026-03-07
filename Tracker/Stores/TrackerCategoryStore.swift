@@ -88,6 +88,18 @@ final class TrackerCategoryStore: NSObject {
         return try context.fetch(request).first
     }
     
+    func fetchCategoryNames() -> [String] {
+        fetchAllCategoryObjects().compactMap {
+            $0.value(forKey: CategoryEntity.title) as? String
+        }
+    }
+    
+    func renameCategory(from oldName: String, to newName: String) throws {
+        guard let categoryObject = try fetchCategoryObject(by: oldName) else { return }
+        categoryObject.setValue(newName, forKey: CategoryEntity.title)
+        saveContext()
+    }
+
     func deleteCategory(_ categoryName: String) throws {
         guard let categoryObject = try fetchCategoryObject(by: categoryName) else {
             return
