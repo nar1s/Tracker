@@ -12,32 +12,46 @@ final class CreateTrackerViewController: UIViewController {
     // MARK: - Properties
     
     private let trackerType: TrackerType
+    private let dataStore: DataStore
     
     private var trackerName: String = "" {
         didSet { updateCreateButtonState() }
     }
     
-    private let selectedCategory: String = "Важное"
+    let selectedCategory: String = "Важное"
     
-    private var selectedSchedule: Set<Weekday> = [] {
+    var selectedSchedule: Set<Weekday> = [] {
         didSet {
             settingsTableView.reloadData()
             updateCreateButtonState()
         }
     }
     
-    private let maxNameLength = 38
+    var selectedColor: String = "" {
+        didSet { updateCreateButtonState() }
+    }
+
+    var selectedEmoji: String = "" {
+        didSet { updateCreateButtonState() }
+    }
     
-    private let selectedColor: String = TrackerColor.color1.colorName
-    private let selectedEmoji: String = "🏃"
+    private let maxNameLength = 38
+    let emojis: [String] = [
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
+    ]
+    
+    let colors: [String] = TrackerColor.allCases.map { $0.colorName }
     
     weak var delegate: CreateTrackerDelegate?
     
     private var errorLabelTimer: Timer?
+    private var contentStackView: UIStackView?
     
     // MARK: - Data Sources
     
-    private enum SettingsRow {
+    enum SettingsRow {
         case category
         case schedule
         
@@ -49,7 +63,7 @@ final class CreateTrackerViewController: UIViewController {
         }
     }
     
-    private var settingsRows: [SettingsRow] {
+    var settingsRows: [SettingsRow] {
         trackerType == .habit ? [.category, .schedule] : [.category]
     }
     
@@ -127,6 +141,86 @@ final class CreateTrackerViewController: UIViewController {
         return tableView
     }()
     
+    private let emojiLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emoji"
+        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.textColor = UIColor(resource: .ypBlack)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var emojiLabelContainer: UIView = {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(emojiLabel)
+        
+        NSLayoutConstraint.activate([
+            emojiLabel.topAnchor.constraint(equalTo: container.topAnchor),
+            emojiLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            emojiLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            emojiLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        
+        return container
+    }()
+    
+    lazy var emojiCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 5
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = UIEdgeInsets(top: 24, left: 0, bottom: 24, right: 0)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "EmojiCell")
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
+    private let colorLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Цвет"
+        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.textColor = UIColor(resource: .ypBlack)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var colorLabelContainer: UIView = {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(colorLabel)
+        
+        NSLayoutConstraint.activate([
+            colorLabel.topAnchor.constraint(equalTo: container.topAnchor),
+            colorLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            colorLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            colorLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        
+        return container
+    }()
+    
+    lazy var colorCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 5
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = UIEdgeInsets(top: 24, left: 0, bottom: 24, right: 0)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "ColorCell")
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
@@ -167,8 +261,11 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(trackerType: TrackerType) {
+    init(trackerType: TrackerType, dataStore: DataStore = .shared) {
         self.trackerType = trackerType
+        self.dataStore = dataStore
+        self.selectedColor = ""
+        self.selectedEmoji = ""
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -198,11 +295,6 @@ final class CreateTrackerViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        
-        contentView.addSubview(nameTextField)
-        contentView.addSubview(errorLabel)
-        contentView.addSubview(settingsTableView)
-        
         view.addSubview(buttonsStackView)
         
         setupConstraints()
@@ -210,6 +302,26 @@ final class CreateTrackerViewController: UIViewController {
     
     private func setupConstraints() {
         let tableHeight: CGFloat = CGFloat(settingsRows.count * 75)
+        
+        let stackView = UIStackView(arrangedSubviews: [
+            nameTextField,
+            errorLabel,
+            settingsTableView,
+            emojiLabelContainer,
+            emojiCollectionView,
+            colorLabelContainer,
+            colorCollectionView
+        ])
+        stackView.axis = .vertical
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        stackView.setCustomSpacing(24, after: nameTextField)
+        stackView.setCustomSpacing(0, after: errorLabel)
+        stackView.setCustomSpacing(32, after: settingsTableView)
+        stackView.setCustomSpacing(16, after: emojiCollectionView)
+        
+        contentView.addSubview(stackView)
+        self.contentStackView = stackView
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 27),
@@ -226,19 +338,15 @@ final class CreateTrackerViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            nameTextField.topAnchor.constraint(equalTo: contentView.topAnchor),
-            nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stackView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
-            
-            errorLabel.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 8),
-            errorLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            
-            settingsTableView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
-            settingsTableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            settingsTableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             settingsTableView.heightAnchor.constraint(equalToConstant: tableHeight),
-            settingsTableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            emojiCollectionView.heightAnchor.constraint(equalToConstant: 204),
+            colorCollectionView.heightAnchor.constraint(equalToConstant: 204),
             
             buttonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             buttonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
@@ -309,15 +417,22 @@ final class CreateTrackerViewController: UIViewController {
             schedule: schedule
         )
         
-        view.window?.rootViewController?.dismiss(animated: true) {
-            self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+        do {
+            try dataStore.addTracker(tracker, to: selectedCategory)
+            
+            view.window?.rootViewController?.dismiss(animated: true) {
+                self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+            }
+        } catch {
+            // Показываем ошибку пользователю
+            showError(error)
         }
     }
     
     @objc private func nameTextFieldChanged() {
         guard let text = nameTextField.text else {
             trackerName = ""
-            errorLabel.isHidden = true
+            hideErrorLabel()
             return
         }
         
@@ -328,20 +443,36 @@ final class CreateTrackerViewController: UIViewController {
             
             showErrorLabel()
         } else {
-            errorLabel.isHidden = true
+            hideErrorLabel()
             trackerName = text
         }
     }
     
     private func showErrorLabel() {
+        guard let stackView = contentStackView else { return }
+        
         errorLabel.isHidden = false
         errorLabelTimer?.invalidate()
+        
+        stackView.setCustomSpacing(8, after: nameTextField)
+        stackView.setCustomSpacing(24, after: errorLabel)
+    }
+    
+    private func hideErrorLabel() {
+        guard let stackView = contentStackView else { return }
+        
+        errorLabel.isHidden = true
+        
+        stackView.setCustomSpacing(24, after: nameTextField)
+        stackView.setCustomSpacing(0, after: errorLabel)
     }
     
     // MARK: - Validation
     
     private var isFormValid: Bool {
         !trackerName.isEmpty &&
+        !selectedEmoji.isEmpty &&
+        !selectedColor.isEmpty &&
         (trackerType == .irregular || !selectedSchedule.isEmpty)
     }
     
@@ -353,11 +484,11 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Navigation
     
-    private func openCategorySelection() {
+    func openCategorySelection() {
         print("Категория: \(selectedCategory)")
     }
     
-    private func openScheduleSelection() {
+    func openScheduleSelection() {
         let vc = ScheduleSelectionViewController(selectedDays: selectedSchedule)
         vc.delegate = self
         vc.modalPresentationStyle = .pageSheet
@@ -366,7 +497,7 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Helper Methods
     
-    private func scheduleDescription() -> String? {
+    func scheduleDescription() -> String? {
         guard !selectedSchedule.isEmpty else { return nil }
         
         if selectedSchedule.count == 7 {
@@ -376,128 +507,15 @@ final class CreateTrackerViewController: UIViewController {
         let sortedDays = selectedSchedule.sorted { $0.rawValue < $1.rawValue }
         return sortedDays.map { $0.shortName }.joined(separator: ", ")
     }
-}
-
-// MARK: - UITextFieldDelegate
-
-extension CreateTrackerViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
-    }
-}
-
-// MARK: - UITableViewDataSource
-
-extension CreateTrackerViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return settingsRows.count
-    }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingsCell", for: indexPath) as! SubtitleTableViewCell
-        cell.backgroundColor = .clear
-        cell.selectionStyle = .none
-        
-        let row = settingsRows[indexPath.row]
-        
-        switch row {
-        case .category:
-            cell.configure(title: row.title, subtitle: selectedCategory)
-        case .schedule:
-            cell.configure(title: row.title, subtitle: scheduleDescription())
-        }
-        
-        cell.accessoryType = .disclosureIndicator
-        
-        if indexPath.row == settingsRows.count - 1 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        }
-        
-        return cell
+    private func showError(_ error: Error) {
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: "Не удалось создать трекер: \(error.localizedDescription)",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
-
-// MARK: - UITableViewDelegate
-
-extension CreateTrackerViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let row = settingsRows[indexPath.row]
-        
-        switch row {
-        case .category:
-            openCategorySelection()
-        case .schedule:
-            openScheduleSelection()
-        }
-    }
-}
-
-// MARK: - Custom Cell
-
-private final class SubtitleTableViewCell: UITableViewCell {
-    
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .regular)
-        label.textColor = UIColor(resource: .ypBlack)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let subtitleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .regular)
-        label.textColor = UIColor(resource: .ypGray)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let stackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.spacing = 2
-        stack.alignment = .leading
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        return stack
-    }()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-        stackView.addArrangedSubview(titleLabel)
-        stackView.addArrangedSubview(subtitleLabel)
-        
-        contentView.addSubview(stackView)
-        
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
-        ])
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func configure(title: String, subtitle: String?) {
-        titleLabel.text = title
-        subtitleLabel.text = subtitle
-        subtitleLabel.isHidden = subtitle == nil
-    }
-}
-
-// MARK: - ScheduleSelectionDelegate
-extension CreateTrackerViewController: ScheduleSelectionDelegate {
-    func didSelectSchedule(_ schedule: Set<Weekday>) {
-        selectedSchedule = schedule
-    }
-}
-
-
 

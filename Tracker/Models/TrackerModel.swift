@@ -13,7 +13,16 @@ struct Tracker {
     let color: String
     let emoji: String
     let schedule: Schedule?
+    let createdAt: Date
     
+    init(id: UUID, name: String, color: String, emoji: String, schedule: Schedule?, createdAt: Date = Date()) {
+        self.id = id
+        self.name = name
+        self.color = color
+        self.emoji = emoji
+        self.schedule = schedule
+        self.createdAt = createdAt
+    }
     var uiColor: UIColor {
         return UIColor(named: color) ?? .systemBlue
     }
