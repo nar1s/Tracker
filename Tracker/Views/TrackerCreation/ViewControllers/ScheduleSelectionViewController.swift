@@ -62,8 +62,9 @@ final class ScheduleSelectionViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Lifecycle
@@ -205,8 +206,9 @@ private final class WeekdayCell: UITableViewCell {
         ])
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     func configure(title: String, isOn: Bool, tag: Int, target: Any?, action: Selector) {

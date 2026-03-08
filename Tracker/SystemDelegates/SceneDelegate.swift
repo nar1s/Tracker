@@ -15,7 +15,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = scene as? UIWindowScene else { return }
         window = UIWindow(windowScene: scene)
         
-        let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+        let hasSeenOnboarding = UserDefaultsService.shared.hasSeenOnboarding
         window?.rootViewController = hasSeenOnboarding ? TabBarViewController() : OnboardingViewController()
         window?.makeKeyAndVisible()
     }

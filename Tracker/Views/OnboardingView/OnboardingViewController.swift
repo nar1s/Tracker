@@ -7,7 +7,7 @@
 
 import UIKit
 
-class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+final class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
 
     init() {
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
@@ -134,7 +134,7 @@ class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSo
 
 extension OnboardingViewController {
     @objc private func skipTapped() {
-        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+        UserDefaultsService.shared.hasSeenOnboarding = true
         
         guard let window = view.window else { return }
         window.rootViewController = TabBarViewController()
