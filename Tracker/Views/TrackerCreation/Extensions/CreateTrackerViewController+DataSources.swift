@@ -23,7 +23,7 @@ extension CreateTrackerViewController: UITableViewDataSource {
         
         switch row {
         case .category:
-            cell.configure(title: row.title, subtitle: selectedCategory)
+            cell.configure(title: row.title, subtitle: selectedCategory.isEmpty ? nil : selectedCategory)
         case .schedule:
             cell.configure(title: row.title, subtitle: scheduleDescription())
         }
@@ -127,6 +127,14 @@ extension CreateTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+// MARK: - CategorySelectionDelegate
+
+extension CreateTrackerViewController: CategorySelectionDelegate {
+    func didSelectCategory(_ category: String) {
+        selectedCategory = category
     }
 }
 
