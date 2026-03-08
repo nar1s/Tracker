@@ -25,7 +25,7 @@ final class TrackersListViewController: UIViewController {
         datePicker.preferredDatePickerStyle = .compact
         datePicker.date = currentDate
         
-        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.locale = Locale.current
         
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
@@ -36,7 +36,7 @@ final class TrackersListViewController: UIViewController {
     
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchBar.placeholder = "Поиск"
+        searchController.searchBar.placeholder = NSLocalizedString("common.search", comment: "")
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
         return searchController
@@ -52,7 +52,7 @@ final class TrackersListViewController: UIViewController {
     
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("trackersList.emptyState", comment: "")
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
@@ -198,7 +198,7 @@ final class TrackersListViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "Трекеры"
+        navigationItem.title = NSLocalizedString("trackersList.title", comment: "")
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [

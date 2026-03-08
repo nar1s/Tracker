@@ -140,16 +140,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let lastTwoDigits = count % 100
         
         if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            return "\(count) дней"
+            return String(format: NSLocalizedString("daysCount.many", comment: ""), count)
         }
         
         switch lastDigit {
         case 1:
-            return "\(count) день"
+            return String(format: NSLocalizedString("daysCount.one", comment: ""), count)
         case 2, 3, 4:
-            return "\(count) дня"
+            return String(format: NSLocalizedString("daysCount.few", comment: ""), count)
         default:
-            return "\(count) дней"
+            return String(format: NSLocalizedString("daysCount.many", comment: ""), count)
         }
     }
     

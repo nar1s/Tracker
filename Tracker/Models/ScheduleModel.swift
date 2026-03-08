@@ -5,6 +5,8 @@
 //  Created by Павел Кузнецов on 29.01.2026.
 //
 
+import Foundation
+
 struct Schedule: Codable {
     let weekdays: Set<Weekday>
 }
@@ -19,25 +21,25 @@ enum Weekday: Int, Codable, CaseIterable {
     
     var fullName: String {
         switch self {
-        case .sunday: return "Воскресенье"
-        case .monday: return "Понедельник"
-        case .tuesday: return "Вторник"
-        case .wednesday: return "Среда"
-        case .thursday: return "Четверг"
-        case .friday: return "Пятница"
-        case .saturday: return "Суббота"
+        case .sunday: return NSLocalizedString("weekday.sunday", comment: "")
+        case .monday: return NSLocalizedString("weekday.monday", comment: "")
+        case .tuesday: return NSLocalizedString("weekday.tuesday", comment: "")
+        case .wednesday: return NSLocalizedString("weekday.wednesday", comment: "")
+        case .thursday: return NSLocalizedString("weekday.thursday", comment: "")
+        case .friday: return NSLocalizedString("weekday.friday", comment: "")
+        case .saturday: return NSLocalizedString("weekday.saturday", comment: "")
         }
     }
     
     var shortName: String {
         switch self {
-        case .sunday: return "Вс"
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
+        case .sunday: return NSLocalizedString("weekday.short.sunday", comment: "")
+        case .monday: return NSLocalizedString("weekday.short.monday", comment: "")
+        case .tuesday: return NSLocalizedString("weekday.short.tuesday", comment: "")
+        case .wednesday: return NSLocalizedString("weekday.short.wednesday", comment: "")
+        case .thursday: return NSLocalizedString("weekday.short.thursday", comment: "")
+        case .friday: return NSLocalizedString("weekday.short.friday", comment: "")
+        case .saturday: return NSLocalizedString("weekday.short.saturday", comment: "")
         }
     }
 }

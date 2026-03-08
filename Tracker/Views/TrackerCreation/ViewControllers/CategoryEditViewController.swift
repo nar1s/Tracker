@@ -27,7 +27,7 @@ final class CategoryEditViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("categoryEdit.namePlaceholder", comment: "")
         textField.font = .systemFont(ofSize: 17, weight: .regular)
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.layer.cornerRadius = 16
@@ -47,7 +47,7 @@ final class CategoryEditViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("common.done", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
@@ -78,11 +78,11 @@ final class CategoryEditViewController: UIViewController {
         setupUI()
         
         if let existingName {
-            titleLabel.text = "Редактирование категории"
+            titleLabel.text = NSLocalizedString("categoryEdit.edit.title", comment: "")
             nameTextField.text = existingName
             updateDoneButtonState()
         } else {
-            titleLabel.text = "Новая категория"
+            titleLabel.text = NSLocalizedString("categoryEdit.new.title", comment: "")
         }
     }
     

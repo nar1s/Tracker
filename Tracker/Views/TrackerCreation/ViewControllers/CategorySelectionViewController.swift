@@ -18,7 +18,7 @@ final class CategorySelectionViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Категория"
+        label.text = NSLocalizedString("categorySelection.title", comment: "")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         
@@ -44,7 +44,7 @@ final class CategorySelectionViewController: UIViewController {
     
     private lazy var placeholderLabel: UILabel = {
         let label = UILabel()
-        label.text = "Привычки и события можно\nобъединить по смыслу"
+        label.text = NSLocalizedString("categorySelection.placeholder", comment: "")
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = UIColor(resource: .ypBlack)
         label.numberOfLines = 2
@@ -72,7 +72,7 @@ final class CategorySelectionViewController: UIViewController {
     
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(NSLocalizedString("categorySelection.addButton", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypBlack)
@@ -183,15 +183,15 @@ final class CategorySelectionViewController: UIViewController {
     private func showDeleteConfirmation(for index: Int) {
         let alert = UIAlertController(
             title: nil,
-            message: "Эта категория точно не нужна?",
+            message: NSLocalizedString("categorySelection.deleteConfirmation", comment: ""),
             preferredStyle: .actionSheet
         )
         
-        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+        let deleteAction = UIAlertAction(title: NSLocalizedString("common.delete", comment: ""), style: .destructive) { [weak self] _ in
             self?.viewModel.deleteCategory(at: index)
         }
         
-        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("common.cancel", comment: ""), style: .cancel)
         
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
@@ -263,12 +263,12 @@ extension CategorySelectionViewController: UITableViewDelegate {
         let categoryName = viewModel.categoryName(at: indexPath.row)
         
         return UIContextMenuConfiguration(actionProvider: { _ in
-            let editAction = UIAction(title: "Редактировать") { [weak self] _ in
+            let editAction = UIAction(title: NSLocalizedString("common.edit", comment: "")) { [weak self] _ in
                 self?.showEditScreen(for: categoryName)
             }
             
             let deleteAction = UIAction(
-                title: "Удалить",
+                title: NSLocalizedString("common.delete", comment: ""),
                 attributes: .destructive
             ) { [weak self] _ in
                 self?.showDeleteConfirmation(for: indexPath.row)

@@ -62,8 +62,8 @@ final class CreateTrackerViewController: UIViewController {
         
         var title: String {
             switch self {
-            case .category: return "Категория"
-            case .schedule: return "Расписание"
+            case .category: return NSLocalizedString("createTracker.category", comment: "")
+            case .schedule: return NSLocalizedString("createTracker.schedule", comment: "")
             }
         }
     }
@@ -100,7 +100,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("createTracker.namePlaceholder", comment: "")
         textField.font = .systemFont(ofSize: 17, weight: .regular)
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.layer.cornerRadius = 16
@@ -122,7 +122,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let errorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Ограничение 38 символов"
+        label.text = NSLocalizedString("createTracker.nameLengthError", comment: "")
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textColor = UIColor(resource: .ypRed)
         label.textAlignment = .center
@@ -148,7 +148,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let emojiLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emoji"
+        label.text = NSLocalizedString("createTracker.emoji", comment: "")
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = UIColor(resource: .ypBlack)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -188,7 +188,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let colorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = NSLocalizedString("createTracker.color", comment: "")
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = UIColor(resource: .ypBlack)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -228,7 +228,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("common.cancel", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypRed), for: .normal)
         button.backgroundColor = UIColor(resource: .ypWhite)
@@ -243,7 +243,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(NSLocalizedString("common.create", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
@@ -514,7 +514,7 @@ final class CreateTrackerViewController: UIViewController {
         guard !selectedSchedule.isEmpty else { return nil }
         
         if selectedSchedule.count == 7 {
-            return "Каждый день"
+            return NSLocalizedString("createTracker.everyDay", comment: "")
         }
         
         let sortedDays = selectedSchedule.sorted { $0.rawValue < $1.rawValue }
@@ -523,11 +523,11 @@ final class CreateTrackerViewController: UIViewController {
     
     private func showError(_ error: Error) {
         let alert = UIAlertController(
-            title: "Ошибка",
-            message: "Не удалось создать трекер: \(error.localizedDescription)",
+            title: NSLocalizedString("common.error", comment: ""),
+            message: String(format: NSLocalizedString("createTracker.error", comment: ""), error.localizedDescription),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("common.ok", comment: ""), style: .default))
         present(alert, animated: true)
     }
 }
