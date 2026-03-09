@@ -28,6 +28,7 @@
 "trackersList.pin" = "Pin";
 "trackersList.unpin" = "Unpin";
 "trackersList.searchEmptyState" = "Nothing found";
+"trackersList.filter" = "Filters";
 
 // MARK: - New Tracker
 "newTracker.title" = "Create tracker";
@@ -87,3 +88,10 @@
 "onboarding.page2" = "Even if it's not\nliters of water and yoga";
 "onboarding.button" = "That's some technology!";
 
+// MARK: - Filters
+"Filters.title" = "Filters";
+"filter.allTrackers" = "All trackers";
+"filter.today" = "Trackers for today";
+"filter.completed" = "Completed";
+"filter.uncompleted" = "Not completed";
+"trackersList.filterEmptyState" = "Nothing found";

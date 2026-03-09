@@ -28,6 +28,7 @@
 "trackersList.pin" = "Закрепить";
 "trackersList.unpin" = "Открепить";
 "trackersList.searchEmptyState" = "Ничего не найдено";
+"trackersList.filter" = "Фильтры";
 
 // MARK: - New Tracker
 "newTracker.title" = "Создание трекера";
@@ -87,3 +88,10 @@
 "onboarding.page2" = "Даже если это\nне литры воды и йога";
 "onboarding.button" = "Вот это технологии!";
 
+// MARK: - Filters
+"Filters.title" = "Фильтры";
+"filter.allTrackers" = "Все трекеры";
+"filter.today" = "Трекеры на сегодня";
+"filter.completed" = "Завершенные";
+"filter.uncompleted" = "Не завершенные";
+"trackersList.filterEmptyState" = "Ничего не найдено";

@@ -1,156 +1,141 @@
 //
-//  ScheduleSelectionViewController.swift
+//  FilterViewController.swift
 //  Tracker
 //
-//  Created by Павел Кузнецов on 27.01.2026.
+//  Created by Павел Кузнецов on 09.03.2026.
 //
 
 import UIKit
 
-final class ScheduleSelectionViewController: UIViewController {
-    
+enum TrackerFilter: Int, CaseIterable {
+    case all = 0
+    case today
+    case completed
+    case uncompleted
+
+    var title: String {
+        switch self {
+        case .all:
+            return NSLocalizedString("filter.allTrackers", comment: "")
+        case .today:
+            return NSLocalizedString("filter.today", comment: "")
+        case .completed:
+            return NSLocalizedString("filter.completed", comment: "")
+        case .uncompleted:
+            return NSLocalizedString("filter.uncompleted", comment: "")
+        }
+    }
+}
+
+protocol FilterViewControllerDelegate: AnyObject {
+    func didSelectFilter(_ filter: TrackerFilter)
+}
+
+final class FilterViewController: UIViewController {
+
     // MARK: - Properties
-    
-    private var selectedDays: Set<Weekday>
-    weak var delegate: ScheduleSelectionDelegate?
-    
-    private let allDays: [Weekday] = [
-        .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
-    ]
-    
+
+    weak var delegate: FilterViewControllerDelegate?
+    private var selectedFilter: TrackerFilter
+
     // MARK: - UI Elements
-    
+
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = NSLocalizedString("scheduleSelection.title", comment: "")
+        label.text = NSLocalizedString("Filters.title", comment: "")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
+
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.backgroundColor = UIColor(resource: .ypWhite)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.separatorColor = UIColor(resource: .ypGray)
+        tableView.isScrollEnabled = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(WeekdayCell.self, forCellReuseIdentifier: "WeekdayCell")
+        tableView.register(FilterCell.self, forCellReuseIdentifier: "FilterCell")
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
-    
-    private lazy var doneButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("common.done", comment: ""), for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
-        button.backgroundColor = UIColor(resource: .ypBlack)
-        button.layer.cornerRadius = 16
-        button.layer.masksToBounds = true
-        button.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
+
     // MARK: - Initialization
-    
-    init(selectedDays: Set<Weekday> = []) {
-        self.selectedDays = selectedDays
+
+    init(selectedFilter: TrackerFilter) {
+        self.selectedFilter = selectedFilter
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
     }
-    
+
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
-    
+
     // MARK: - UI Setup
-    
+
     private func setupUI() {
         view.backgroundColor = UIColor(resource: .ypWhite)
-        
+
         view.addSubview(titleLabel)
         view.addSubview(tableView)
-        view.addSubview(doneButton)
-        
+
         setupConstraints()
     }
-    
+
     private func setupConstraints() {
+        let tableHeight = CGFloat(TrackerFilter.allCases.count) * 75
+
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 27),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
+
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.bottomAnchor.constraint(equalTo: doneButton.topAnchor, constant: -16),
-            
-            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            doneButton.heightAnchor.constraint(equalToConstant: 60)
+            tableView.heightAnchor.constraint(equalToConstant: tableHeight)
         ])
-    }
-    
-    // MARK: - Actions
-    
-    @objc private func doneButtonTapped() {
-        delegate?.didSelectSchedule(selectedDays)
-        dismiss(animated: true)
-    }
-    
-    @objc private func switchValueChanged(_ sender: UISwitch) {
-        let weekday = allDays[sender.tag]
-        
-        if sender.isOn {
-            selectedDays.insert(weekday)
-        } else {
-            selectedDays.remove(weekday)
-        }
     }
 }
 
 // MARK: - UITableViewDataSource
 
-extension ScheduleSelectionViewController: UITableViewDataSource {
+extension FilterViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allDays.count
+        return TrackerFilter.allCases.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WeekdayCell", for: indexPath) as? WeekdayCell
-        
-        let weekday = allDays[indexPath.row]
-        let isSelected = selectedDays.contains(weekday)
-        
-        cell?.configure(
-            title: weekday.fullName,
-            isOn: isSelected,
-            tag: indexPath.row,
-            target: self,
-            action: #selector(switchValueChanged(_:))
-        )
-        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "FilterCell", for: indexPath) as? FilterCell
+
+        let filter = TrackerFilter.allCases[indexPath.row]
+        let isSelected = filter == selectedFilter
+
+        cell?.configure(title: filter.title, isSelected: isSelected)
+
         if indexPath.row == 0 {
             cell?.layer.cornerRadius = 16
             cell?.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        } else if indexPath.row == allDays.count - 1 {
+            cell?.clipsToBounds = true
+        } else if indexPath.row == TrackerFilter.allCases.count - 1 {
             cell?.layer.cornerRadius = 16
             cell?.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell?.clipsToBounds = true
             cell?.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        } else {
+            cell?.layer.cornerRadius = 0
         }
-        
+
         guard let cell else {
             fatalError("Unwrapped cell is nil")
         }
@@ -160,16 +145,23 @@ extension ScheduleSelectionViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate
 
-extension ScheduleSelectionViewController: UITableViewDelegate {
+extension FilterViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let filter = TrackerFilter.allCases[indexPath.row]
+        selectedFilter = filter
+        delegate?.didSelectFilter(filter)
+        dismiss(animated: true)
     }
 }
 
 // MARK: - Custom Cell
 
-private final class WeekdayCell: UITableViewCell {
-    
+private final class FilterCell: UITableViewCell {
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .regular)
@@ -177,41 +169,44 @@ private final class WeekdayCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private let switchControl: UISwitch = {
-        let switchControl = UISwitch()
-        switchControl.onTintColor = .systemBlue
-        switchControl.translatesAutoresizingMaskIntoConstraints = false
-        return switchControl
+
+    private let checkmarkImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "checkmark")
+        imageView.tintColor = UIColor(resource: .ypBlue)
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
     }()
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         backgroundColor = UIColor(resource: .ypBackground)
         selectionStyle = .none
-        
+
         contentView.addSubview(titleLabel)
-        contentView.addSubview(switchControl)
-        
+        contentView.addSubview(checkmarkImageView)
+
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            
-            switchControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            switchControl.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+
+            checkmarkImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            checkmarkImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            checkmarkImageView.widthAnchor.constraint(equalToConstant: 24),
+            checkmarkImageView.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
     }
-    
-    func configure(title: String, isOn: Bool, tag: Int, target: Any?, action: Selector) {
+
+    func configure(title: String, isSelected: Bool) {
         titleLabel.text = title
-        switchControl.isOn = isOn
-        switchControl.tag = tag
-        switchControl.addTarget(target, action: action, for: .valueChanged)
+        checkmarkImageView.isHidden = !isSelected
     }
 }
