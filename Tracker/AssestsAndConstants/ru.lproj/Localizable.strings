@@ -74,11 +74,6 @@
 "weekday.short.friday" = "Пт";
 "weekday.short.saturday" = "Сб";
 
-// MARK: - Days Count
-"daysCount.one" = "%d день";
-"daysCount.few" = "%d дня";
-"daysCount.many" = "%d дней";
-
 // MARK: - Onboarding
 "onboarding.page1" = "Отслеживайте только\nто, что хотите";
 "onboarding.page2" = "Даже если это\nне литры воды и йога";

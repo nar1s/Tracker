@@ -74,11 +74,6 @@
 "weekday.short.friday" = "Fri";
 "weekday.short.saturday" = "Sat";
 
-// MARK: - Days Count
-"daysCount.one" = "%d day";
-"daysCount.few" = "%d days";
-"daysCount.many" = "%d days";
-
 // MARK: - Onboarding
 "onboarding.page1" = "Track only\nwhat you want";
 "onboarding.page2" = "Even if it's not\nliters of water and yoga";

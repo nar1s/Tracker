@@ -19,6 +19,22 @@ final class TrackersListViewController: UIViewController {
     
     // MARK: - UI
     
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yy"
+        return formatter
+    }()
+    
+    private lazy var dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        label.textColor = .black
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isUserInteractionEnabled = false
+        return label
+    }()
+    
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
@@ -26,6 +42,7 @@ final class TrackersListViewController: UIViewController {
         datePicker.date = currentDate
         
         datePicker.locale = Locale.current
+        datePicker.calendar = Calendar(identifier: .gregorian)
         
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
@@ -97,11 +114,9 @@ final class TrackersListViewController: UIViewController {
         visibleCategories = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
                 guard let schedule = tracker.schedule else {
-                    // Если нет расписания (нерегулярное событие), показываем всегда
                     return true
                 }
                 
-                // Проверяем, содержит ли расписание текущий день недели
                 return schedule.weekdays.contains(where: { $0.rawValue == filterWeekday })
             }
             
@@ -222,7 +237,33 @@ final class TrackersListViewController: UIViewController {
             addTrackerButton.heightAnchor.constraint(equalToConstant: 42)
         ])
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        let datePickerContainer = UIView()
+        datePickerContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        datePickerContainer.addSubview(datePicker)
+        datePickerContainer.addSubview(dateLabel)
+        
+        NSLayoutConstraint.activate([
+            datePickerContainer.widthAnchor.constraint(equalToConstant: 77),
+            datePickerContainer.heightAnchor.constraint(equalToConstant: 34),
+            
+            datePicker.leadingAnchor.constraint(equalTo: datePickerContainer.leadingAnchor),
+            datePicker.trailingAnchor.constraint(equalTo: datePickerContainer.trailingAnchor),
+            datePicker.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
+            datePicker.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor),
+            
+            dateLabel.leadingAnchor.constraint(equalTo: datePickerContainer.leadingAnchor),
+            dateLabel.trailingAnchor.constraint(equalTo: datePickerContainer.trailingAnchor),
+            dateLabel.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
+            dateLabel.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor)
+        ])
+        
+        dateLabel.backgroundColor = UIColor(resource: .ypDatePicker)
+        dateLabel.layer.cornerRadius = 8
+        dateLabel.clipsToBounds = true
+        dateLabel.text = dateFormatter.string(from: currentDate)
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePickerContainer)
         
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -239,6 +280,7 @@ final class TrackersListViewController: UIViewController {
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
+        dateLabel.text = dateFormatter.string(from: currentDate)
         loadCategories()
         updateVisibleCategories()
         updateEmptyState()
@@ -354,8 +396,6 @@ private extension TrackersListViewController {
 // MARK: - CreateTrackerDelegate
 extension TrackersListViewController: CreateTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
-        // Трекер уже сохранен в CreateTrackerViewController через dataStore
-        // Здесь просто обновляем UI
         loadCategories()
         updateVisibleCategories()
         updateEmptyState()
