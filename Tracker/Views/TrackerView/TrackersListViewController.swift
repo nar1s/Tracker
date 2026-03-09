@@ -6,7 +6,7 @@
 //
 
 import UIKit
-    
+
 final class TrackersListViewController: UIViewController {
     
     // MARK: - Properties
@@ -95,7 +95,7 @@ final class TrackersListViewController: UIViewController {
         updateEmptyState()
         collectionView.reloadData()
     }
-
+    
     // MARK: - Private Methods
     
     private func loadCategories() {
@@ -111,21 +111,35 @@ final class TrackersListViewController: UIViewController {
         let calendar = Calendar.current
         let filterWeekday = calendar.component(.weekday, from: currentDate)
         
-        visibleCategories = categories.compactMap { category in
+        var pinnedTrackers: [Tracker] = []
+        var regularCategories: [TrackerCategory] = []
+        
+        for category in categories {
             let filteredTrackers = category.trackers.filter { tracker in
                 guard let schedule = tracker.schedule else {
                     return true
                 }
-                
                 return schedule.weekdays.contains(where: { $0.rawValue == filterWeekday })
             }
             
-            if filteredTrackers.isEmpty {
-                return nil
-            }
+            let pinned = filteredTrackers.filter { $0.isPinned }
+            let unpinned = filteredTrackers.filter { !$0.isPinned }
             
-            return TrackerCategory(name: category.name, trackers: filteredTrackers)
+            pinnedTrackers.append(contentsOf: pinned)
+            
+            if !unpinned.isEmpty {
+                regularCategories.append(TrackerCategory(name: category.name, trackers: unpinned))
+            }
         }
+        
+        var result: [TrackerCategory] = []
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategoryName = NSLocalizedString("trackersList.pinned", comment: "")
+            result.append(TrackerCategory(name: pinnedCategoryName, trackers: pinnedTrackers))
+        }
+        result.append(contentsOf: regularCategories)
+        
+        visibleCategories = result
     }
     
     private func updateEmptyState() {
@@ -185,7 +199,7 @@ final class TrackersListViewController: UIViewController {
         view.backgroundColor = UIColor(resource: .ypWhite)
         
         setupNavigationBar()
-                
+        
         view.addSubview(emptyStateImageView)
         view.addSubview(emptyStateLabel)
         view.addSubview(collectionView)
@@ -366,6 +380,35 @@ extension TrackersListViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: 20)
     }
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self = self else { return nil }
+            
+            let pinTitle = tracker.isPinned
+            ? NSLocalizedString("trackersList.unpin", comment: "")
+            : NSLocalizedString("trackersList.pin", comment: "")
+            
+            let pinAction = UIAction(title: pinTitle) { [weak self] _ in
+                self?.togglePin(for: tracker)
+            }
+            
+            let editAction = UIAction(title: NSLocalizedString("common.edit", comment: "")) { [weak self] _ in
+                self?.editTracker(tracker)
+            }
+            
+            let deleteAction = UIAction(
+                title: NSLocalizedString("common.delete", comment: ""),
+                attributes: .destructive
+            ) { [weak self] _ in
+                self?.showDeleteConfirmation(for: tracker)
+            }
+            
+            return UIMenu(children: [pinAction, editAction, deleteAction])
+        }
+    }
 }
 
 // MARK: - Tracker Completion Handling
@@ -390,6 +433,61 @@ private extension TrackersListViewController {
         }
         
         collectionView.reloadItems(at: [indexPath])
+    }
+    
+    func togglePin(for tracker: Tracker) {
+        do {
+            try dataStore.togglePin(trackerId: tracker.id)
+            loadCategories()
+            updateVisibleCategories()
+            updateEmptyState()
+            collectionView.reloadData()
+        } catch {
+            print("Failed to toggle pin: \(error)")
+        }
+    }
+    
+    func editTracker(_ tracker: Tracker) {
+        let categoryName = dataStore.fetchCategoryName(for: tracker.id) ?? ""
+        let trackerType: TrackerType = tracker.schedule != nil ? .habit : .irregular
+        let vc = CreateTrackerViewController(trackerType: trackerType, editingTracker: tracker, editingCategory: categoryName)
+        vc.delegate = self
+        vc.modalPresentationStyle = .pageSheet
+        present(vc, animated: true)
+    }
+    
+    func showDeleteConfirmation(for tracker: Tracker) {
+        let alert = UIAlertController(
+            title: nil,
+            message: NSLocalizedString("trackersList.deleteConfirmation", comment: ""),
+            preferredStyle: .actionSheet
+        )
+        
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("common.delete", comment: ""),
+            style: .destructive
+        ) { [weak self] _ in
+            self?.deleteTracker(tracker)
+        })
+        
+        alert.addAction(UIAlertAction(
+            title: NSLocalizedString("common.cancel", comment: ""),
+            style: .cancel
+        ))
+        
+        present(alert, animated: true)
+    }
+    
+    func deleteTracker(_ tracker: Tracker) {
+        do {
+            try dataStore.deleteTracker(trackerId: tracker.id)
+            loadCategories()
+            updateVisibleCategories()
+            updateEmptyState()
+            collectionView.reloadData()
+        } catch {
+            print("Failed to delete tracker: \(error)")
+        }
     }
 }
 

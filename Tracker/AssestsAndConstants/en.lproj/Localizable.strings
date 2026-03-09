@@ -24,15 +24,22 @@
 "trackersList.title" = "Trackers";
 "trackersList.emptyState" = "What are we going to track?";
 "trackersList.deleteConfirmation" = "Are you sure you want to delete the tracker?";
+"trackersList.pinned" = "Pinned";
+"trackersList.pin" = "Pin";
+"trackersList.unpin" = "Unpin";
 
 // MARK: - New Tracker
 "newTracker.title" = "Create tracker";
 "newTracker.habit" = "Habit";
 "newTracker.irregularEvent" = "Irregular event";
 
+// MARK: - Common (continued)
+"common.save" = "Save";
+
 // MARK: - Create Tracker
 "createTracker.habit.title" = "New habit";
 "createTracker.irregular.title" = "New irregular event";
+"createTracker.edit.title" = "Edit tracker";
 "createTracker.namePlaceholder" = "Enter tracker name";
 "createTracker.nameLengthError" = "Limit of 38 characters";
 "createTracker.category" = "Category";

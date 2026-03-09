@@ -24,15 +24,22 @@
 "trackersList.title" = "Трекеры";
 "trackersList.emptyState" = "Что будем отслеживать?";
 "trackersList.deleteConfirmation" = "Уверены что хотите удалить трекер?";
+"trackersList.pinned" = "Закрепленные";
+"trackersList.pin" = "Закрепить";
+"trackersList.unpin" = "Открепить";
 
 // MARK: - New Tracker
 "newTracker.title" = "Создание трекера";
 "newTracker.habit" = "Привычка";
 "newTracker.irregularEvent" = "Нерегулярное событие";
 
+// MARK: - Common (continued)
+"common.save" = "Сохранить";
+
 // MARK: - Create Tracker
 "createTracker.habit.title" = "Новая привычка";
 "createTracker.irregular.title" = "Новое нерегулярное событие";
+"createTracker.edit.title" = "Редактирование привычки";
 "createTracker.namePlaceholder" = "Введите название трекера";
 "createTracker.nameLengthError" = "Ограничение 38 символов";
 "createTracker.category" = "Категория";

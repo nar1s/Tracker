@@ -13,6 +13,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private let trackerType: TrackerType
     private let dataStore: DataStore
+    private let editingTracker: Tracker?
+    private let editingCategory: String?
     
     private var trackerName: String = "" {
         didSet { updateCreateButtonState() }
@@ -90,11 +92,23 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = trackerType.title
+        label.text = editingTracker != nil
+            ? NSLocalizedString("createTracker.edit.title", comment: "")
+            : trackerType.title
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var daysCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+        label.textColor = UIColor(resource: .ypBlack)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
         return label
     }()
     
@@ -243,7 +257,10 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("common.create", comment: ""), for: .normal)
+        let buttonTitle = editingTracker != nil
+            ? NSLocalizedString("common.save", comment: "")
+            : NSLocalizedString("common.create", comment: "")
+        button.setTitle(buttonTitle, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
@@ -266,9 +283,11 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(trackerType: TrackerType, dataStore: DataStore = .shared) {
+    init(trackerType: TrackerType, dataStore: DataStore = .shared, editingTracker: Tracker? = nil, editingCategory: String? = nil) {
         self.trackerType = trackerType
         self.dataStore = dataStore
+        self.editingTracker = editingTracker
+        self.editingCategory = editingCategory
         self.selectedColor = ""
         self.selectedEmoji = ""
         super.init(nibName: nil, bundle: nil)
@@ -285,6 +304,10 @@ final class CreateTrackerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupKeyboardObservers()
+        
+        if let tracker = editingTracker {
+            prefillForEditing(tracker)
+        }
     }
     
     deinit {
@@ -309,6 +332,7 @@ final class CreateTrackerViewController: UIViewController {
         let tableHeight: CGFloat = CGFloat(settingsRows.count * 75)
         
         let stackView = UIStackView(arrangedSubviews: [
+            daysCountLabel,
             nameTextField,
             errorLabel,
             settingsTableView,
@@ -320,6 +344,7 @@ final class CreateTrackerViewController: UIViewController {
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
+        stackView.setCustomSpacing(40, after: daysCountLabel)
         stackView.setCustomSpacing(24, after: nameTextField)
         stackView.setCustomSpacing(0, after: errorLabel)
         stackView.setCustomSpacing(32, after: settingsTableView)
@@ -413,23 +438,35 @@ final class CreateTrackerViewController: UIViewController {
         guard isFormValid else { return }
         
         let schedule: Schedule? = trackerType == .habit ? Schedule(weekdays: selectedSchedule) : nil
+        let trackerId = editingTracker?.id ?? UUID()
+        let isPinned = editingTracker?.isPinned ?? false
         
         let tracker = Tracker(
-            id: UUID(),
+            id: trackerId,
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: schedule
+            schedule: schedule,
+            isPinned: isPinned
         )
         
         do {
-            try dataStore.addTracker(tracker, to: selectedCategory)
+            if editingTracker != nil {
+                try dataStore.updateTracker(tracker, in: selectedCategory)
+            } else {
+                try dataStore.addTracker(tracker, to: selectedCategory)
+            }
             
-            view.window?.rootViewController?.dismiss(animated: true) {
-                self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+            if editingTracker != nil {
+                dismiss(animated: true) {
+                    self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+                }
+            } else {
+                view.window?.rootViewController?.dismiss(animated: true) {
+                    self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+                }
             }
         } catch {
-            // Показываем ошибку пользователю
             showError(error)
         }
     }
@@ -529,6 +566,33 @@ final class CreateTrackerViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("common.ok", comment: ""), style: .default))
         present(alert, animated: true)
+    }
+    
+    private func prefillForEditing(_ tracker: Tracker) {
+        trackerName = tracker.name
+        nameTextField.text = tracker.name
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        
+        if let category = editingCategory {
+            selectedCategory = category
+        }
+        
+        if let schedule = tracker.schedule {
+            selectedSchedule = schedule.weekdays
+        }
+        
+        let completedDays = (try? dataStore.getCompletionCount(for: tracker.id)) ?? 0
+        daysCountLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: ""),
+            completedDays
+        )
+        daysCountLabel.isHidden = false
+        
+        emojiCollectionView.reloadData()
+        colorCollectionView.reloadData()
+        settingsTableView.reloadData()
+        updateCreateButtonState()
     }
 }
 
