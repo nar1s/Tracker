@@ -14,6 +14,7 @@ final class TrackersListViewController: UIViewController {
     private var currentDate: Date = Date()
     private var categories: [TrackerCategory] = []
     private var visibleCategories: [TrackerCategory] = []
+    private var searchText: String = ""
     
     private let dataStore = DataStore.shared
     
@@ -56,12 +57,13 @@ final class TrackersListViewController: UIViewController {
         searchController.searchBar.placeholder = NSLocalizedString("common.search", comment: "")
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchResultsUpdater = self
         return searchController
     }()
     
     private let emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(resource: .placeholder).withRenderingMode(.alwaysOriginal)
+        imageView.image = UIImage(resource: .findPlaceholder)
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -110,16 +112,23 @@ final class TrackersListViewController: UIViewController {
     private func updateVisibleCategories() {
         let calendar = Calendar.current
         let filterWeekday = calendar.component(.weekday, from: currentDate)
+        let lowercasedSearch = searchText.lowercased()
         
         var pinnedTrackers: [Tracker] = []
         var regularCategories: [TrackerCategory] = []
         
         for category in categories {
             let filteredTrackers = category.trackers.filter { tracker in
-                guard let schedule = tracker.schedule else {
-                    return true
+                let matchesSchedule: Bool
+                if let schedule = tracker.schedule {
+                    matchesSchedule = schedule.weekdays.contains(where: { $0.rawValue == filterWeekday })
+                } else {
+                    matchesSchedule = true
                 }
-                return schedule.weekdays.contains(where: { $0.rawValue == filterWeekday })
+                
+                let matchesSearch = lowercasedSearch.isEmpty || tracker.name.lowercased().contains(lowercasedSearch)
+                
+                return matchesSchedule && matchesSearch
             }
             
             let pinned = filteredTrackers.filter { $0.isPinned }
@@ -148,6 +157,12 @@ final class TrackersListViewController: UIViewController {
         emptyStateImageView.isHidden = hasVisibleTrackers
         emptyStateLabel.isHidden = hasVisibleTrackers
         collectionView.isHidden = !hasVisibleTrackers
+        
+        if !hasVisibleTrackers && !searchText.isEmpty {
+            emptyStateLabel.text = NSLocalizedString("trackersList.searchEmptyState", comment: "")
+        } else {
+            emptyStateLabel.text = NSLocalizedString("trackersList.emptyState", comment: "")
+        }
     }
     
     private func addTracker(_ tracker: Tracker, to categoryTitle: String) {
@@ -501,3 +516,11 @@ extension TrackersListViewController: CreateTrackerDelegate {
     }
 }
 
+extension TrackersListViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        searchText = searchController.searchBar.text ?? ""
+        updateVisibleCategories()
+        updateEmptyState()
+        collectionView.reloadData()
+    }
+}

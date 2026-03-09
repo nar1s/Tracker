@@ -27,6 +27,7 @@
 "trackersList.pinned" = "Закрепленные";
 "trackersList.pin" = "Закрепить";
 "trackersList.unpin" = "Открепить";
+"trackersList.searchEmptyState" = "Ничего не найдено";
 
 // MARK: - New Tracker
 "newTracker.title" = "Создание трекера";

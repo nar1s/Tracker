@@ -27,6 +27,7 @@
 "trackersList.pinned" = "Pinned";
 "trackersList.pin" = "Pin";
 "trackersList.unpin" = "Unpin";
+"trackersList.searchEmptyState" = "Nothing found";
 
 // MARK: - New Tracker
 "newTracker.title" = "Create tracker";
