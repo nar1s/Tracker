@@ -95,3 +95,11 @@
 "filter.completed" = "Completed";
 "filter.uncompleted" = "Not completed";
 "trackersList.filterEmptyState" = "Nothing found";
+
+// MARK: - Statistics
+"Statistics.title" = "Statistics";
+"Statistics.placeholder" = "There is nothing to analyze yet";
+"Statistics.bestPeriod" = "Best period";
+"Statistics.perfectDays" = "Perfect days";
+"Statistics.completedTrackers" = "Trackers completed";
+"Statistics.averageValue" = "Average value";

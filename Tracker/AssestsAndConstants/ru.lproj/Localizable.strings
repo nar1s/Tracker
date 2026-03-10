@@ -95,3 +95,11 @@
 "filter.completed" = "Завершенные";
 "filter.uncompleted" = "Не завершенные";
 "trackersList.filterEmptyState" = "Ничего не найдено";
+
+// MARK: - Statistics
+"Statistics.title" = "Статистика";
+"Statistics.placeholder" = "Анализировать пока нечего";
+"Statistics.bestPeriod" = "Лучший период";
+"Statistics.perfectDays" = "Идеальные дни";
+"Statistics.completedTrackers" = "Трекеров завершено";
+"Statistics.averageValue" = "Среднее значение";

@@ -77,4 +77,12 @@ final class DataStore {
     func fetchCategoryName(for trackerId: UUID) -> String? {
         return trackerStore.fetchCategoryName(for: trackerId)
     }
+    
+    func fetchAllTrackers() throws -> [Tracker] {
+        return try trackerStore.fetchAllTrackers()
+    }
+    
+    func fetchAllRecords() throws -> [TrackerRecord] {
+        return try recordStore.fetchAllRecords()
+    }
 }
