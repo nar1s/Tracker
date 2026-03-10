@@ -115,6 +115,16 @@ final class TrackersListViewController: UIViewController {
         collectionView.reloadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.report(event: "open", params: ["screen": "Main"])
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.report(event: "close", params: ["screen": "Main"])
+    }
+    
     // MARK: - Private Methods
     
     private func loadCategories() {
@@ -363,6 +373,7 @@ final class TrackersListViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func addTrackerTapped() {
+        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "add_track"])
         let vc = NewTrackerViewController()
         vc.delegate = self
         vc.modalPresentationStyle = .pageSheet
@@ -379,6 +390,7 @@ final class TrackersListViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped() {
+        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
         let vc = FilterViewController(selectedFilter: currentFilter)
         vc.delegate = self
         vc.modalPresentationStyle = .pageSheet
@@ -500,6 +512,7 @@ extension TrackersListViewController: UICollectionViewDelegateFlowLayout {
 private extension TrackersListViewController {
     
     func handleTrackerCompletion(at indexPath: IndexPath) {
+        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
         
         let calendar = Calendar.current
@@ -538,6 +551,7 @@ private extension TrackersListViewController {
     }
     
     func editTracker(_ tracker: Tracker) {
+        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
         let categoryName = dataStore.fetchCategoryName(for: tracker.id) ?? ""
         let trackerType: TrackerType = tracker.schedule != nil ? .habit : .irregular
         let vc = CreateTrackerViewController(trackerType: trackerType, editingTracker: tracker, editingCategory: categoryName)
@@ -547,6 +561,7 @@ private extension TrackersListViewController {
     }
     
     func showDeleteConfirmation(for tracker: Tracker) {
+        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
         let alert = UIAlertController(
             title: nil,
             message: NSLocalizedString("trackersList.deleteConfirmation", comment: ""),
