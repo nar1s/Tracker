@@ -119,7 +119,7 @@ extension FilterViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FilterCell", for: indexPath) as? FilterCell
 
         let filter = TrackerFilter.allCases[indexPath.row]
-        let isSelected = filter == selectedFilter
+        let isSelected = filter == selectedFilter && filter != .all && filter != .today
 
         cell?.configure(title: filter.title, isSelected: isSelected)
 
@@ -137,7 +137,8 @@ extension FilterViewController: UITableViewDataSource {
         }
 
         guard let cell else {
-            fatalError("Unwrapped cell is nil")
+            assertionFailure("Unwrapped cell is nil")
+            return UITableViewCell()
         }
         return cell
     }

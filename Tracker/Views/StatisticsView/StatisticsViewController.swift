@@ -56,7 +56,7 @@ final class StatisticsViewController: UIViewController {
 
     private let placeholderImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "statisticsPlaceholder")
+        imageView.image = UIImage(resource: .statisticsPlaceholder)
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()

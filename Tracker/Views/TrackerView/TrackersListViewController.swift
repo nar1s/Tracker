@@ -27,14 +27,16 @@ final class TrackersListViewController: UIViewController {
         return formatter
     }()
     
-    private lazy var dateLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .regular)
-        label.textColor = .black
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.isUserInteractionEnabled = false
-        return label
+    private lazy var dateButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(dateFormatter.string(from: currentDate), for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        button.setTitleColor(UIColor(resource: .ypBlack), for: .normal)
+        button.backgroundColor = UIColor(resource: .ypDatePicker)
+        button.layer.cornerRadius = 8
+        button.isUserInteractionEnabled = false
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     private lazy var datePicker: UIDatePicker = {
@@ -46,10 +48,10 @@ final class TrackersListViewController: UIViewController {
         datePicker.locale = Locale.current
         datePicker.calendar = Calendar(identifier: .gregorian)
         
+        datePicker.alpha = 0.02
+        
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
-        datePicker.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        datePicker.heightAnchor.constraint(equalToConstant: 34).isActive = true
         return datePicker
     }()
     
@@ -117,12 +119,12 @@ final class TrackersListViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        AnalyticsService.report(event: "open", params: ["screen": "Main"])
+        AnalyticsService.report(event: MainScreenEvent.open.rawValue, params: ["screen": "Main"])
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        AnalyticsService.report(event: "close", params: ["screen": "Main"])
+        AnalyticsService.report(event: MainScreenEvent.close.rawValue, params: ["screen": "Main"])
     }
     
     // MARK: - Private Methods
@@ -341,8 +343,8 @@ final class TrackersListViewController: UIViewController {
         let datePickerContainer = UIView()
         datePickerContainer.translatesAutoresizingMaskIntoConstraints = false
         
+        datePickerContainer.addSubview(dateButton)
         datePickerContainer.addSubview(datePicker)
-        datePickerContainer.addSubview(dateLabel)
         
         NSLayoutConstraint.activate([
             datePickerContainer.widthAnchor.constraint(equalToConstant: 77),
@@ -353,17 +355,13 @@ final class TrackersListViewController: UIViewController {
             datePicker.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
             datePicker.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor),
             
-            dateLabel.leadingAnchor.constraint(equalTo: datePickerContainer.leadingAnchor),
-            dateLabel.trailingAnchor.constraint(equalTo: datePickerContainer.trailingAnchor),
-            dateLabel.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
-            dateLabel.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor)
+            dateButton.leadingAnchor.constraint(equalTo: datePickerContainer.leadingAnchor),
+            dateButton.trailingAnchor.constraint(equalTo: datePickerContainer.trailingAnchor),
+            dateButton.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
+            dateButton.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor),
         ])
         
-        dateLabel.backgroundColor = UIColor(resource: .ypDatePicker)
-        dateLabel.layer.cornerRadius = 8
-        dateLabel.clipsToBounds = true
-        dateLabel.text = dateFormatter.string(from: currentDate)
-        
+        dateButton.titleLabel?.textAlignment = .center
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePickerContainer)
         
         navigationItem.searchController = searchController
@@ -373,7 +371,7 @@ final class TrackersListViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func addTrackerTapped() {
-        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "add_track"])
+        AnalyticsService.report(event: MainScreenEvent.click.rawValue, params: ["screen": "Main", "item": "add_track"])
         let vc = NewTrackerViewController()
         vc.delegate = self
         vc.modalPresentationStyle = .pageSheet
@@ -382,7 +380,7 @@ final class TrackersListViewController: UIViewController {
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        dateLabel.text = dateFormatter.string(from: currentDate)
+        dateButton.setTitle(dateFormatter.string(from: currentDate), for: .normal)
         loadCategories()
         updateVisibleCategories()
         updateEmptyState()
@@ -390,7 +388,7 @@ final class TrackersListViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped() {
-        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
+        AnalyticsService.report(event: MainScreenEvent.click.rawValue, params: ["screen": "Main", "item": "filter"])
         let vc = FilterViewController(selectedFilter: currentFilter)
         vc.delegate = self
         vc.modalPresentationStyle = .pageSheet
@@ -428,7 +426,8 @@ extension TrackersListViewController: UICollectionViewDataSource {
         }
         
         guard let cell else {
-            fatalError("Unwrapped cell is nil")
+            assertionFailure("Unwrapped cell is nil")
+            return UICollectionViewCell()
         }
         return cell
     }
@@ -512,7 +511,7 @@ extension TrackersListViewController: UICollectionViewDelegateFlowLayout {
 private extension TrackersListViewController {
     
     func handleTrackerCompletion(at indexPath: IndexPath) {
-        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
+        AnalyticsService.report(event: MainScreenEvent.click.rawValue, params: ["screen": "Main", "item": "track"])
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
         
         let calendar = Calendar.current
@@ -551,7 +550,7 @@ private extension TrackersListViewController {
     }
     
     func editTracker(_ tracker: Tracker) {
-        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
+        AnalyticsService.report(event: MainScreenEvent.click.rawValue, params: ["screen": "Main", "item": "edit"])
         let categoryName = dataStore.fetchCategoryName(for: tracker.id) ?? ""
         let trackerType: TrackerType = tracker.schedule != nil ? .habit : .irregular
         let vc = CreateTrackerViewController(trackerType: trackerType, editingTracker: tracker, editingCategory: categoryName)
@@ -561,7 +560,7 @@ private extension TrackersListViewController {
     }
     
     func showDeleteConfirmation(for tracker: Tracker) {
-        AnalyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
+        AnalyticsService.report(event: MainScreenEvent.click.rawValue, params: ["screen": "Main", "item": "delete"])
         let alert = UIAlertController(
             title: nil,
             message: NSLocalizedString("trackersList.deleteConfirmation", comment: ""),
@@ -615,7 +614,7 @@ extension TrackersListViewController: FilterViewControllerDelegate {
         if filter == .today {
             currentDate = Date()
             datePicker.date = currentDate
-            dateLabel.text = dateFormatter.string(from: currentDate)
+            dateButton.setTitle(dateFormatter.string(from: currentDate), for: .normal)
         }
         
         loadCategories()
@@ -632,4 +631,10 @@ extension TrackersListViewController: UISearchResultsUpdating {
         updateEmptyState()
         collectionView.reloadData()
     }
+}
+
+enum MainScreenEvent: String {
+    case open
+    case close
+    case click
 }
