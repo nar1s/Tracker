@@ -1,0 +1,105 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Павел Кузнецов on 09.03.2026.
+  
+*/
+
+// MARK: - Common
+"common.cancel" = "Cancel";
+"common.delete" = "Delete";
+"common.done" = "Done";
+"common.create" = "Create";
+"common.edit" = "Edit";
+"common.search" = "Search";
+"common.error" = "Error";
+"common.ok" = "OK";
+
+// MARK: - Tab Bar
+"tabBar.trackers" = "Trackers";
+"tabBar.statistics" = "Statistics";
+
+// MARK: - Trackers List
+"trackersList.title" = "Trackers";
+"trackersList.emptyState" = "What are we going to track?";
+"trackersList.deleteConfirmation" = "Are you sure you want to delete the tracker?";
+"trackersList.pinned" = "Pinned";
+"trackersList.pin" = "Pin";
+"trackersList.unpin" = "Unpin";
+"trackersList.searchEmptyState" = "Nothing found";
+"trackersList.filter" = "Filters";
+
+// MARK: - New Tracker
+"newTracker.title" = "Create tracker";
+"newTracker.habit" = "Habit";
+"newTracker.irregularEvent" = "Irregular event";
+
+// MARK: - Common (continued)
+"common.save" = "Save";
+
+// MARK: - Create Tracker
+"createTracker.habit.title" = "New habit";
+"createTracker.irregular.title" = "New irregular event";
+"createTracker.edit.title" = "Edit tracker";
+"createTracker.namePlaceholder" = "Enter tracker name";
+"createTracker.nameLengthError" = "Limit of 38 characters";
+"createTracker.category" = "Category";
+"createTracker.schedule" = "Schedule";
+"createTracker.emoji" = "Emoji";
+"createTracker.color" = "Color";
+"createTracker.everyDay" = "Every day";
+"createTracker.error" = "Failed to create tracker: %@";
+
+// MARK: - Category Selection
+"categorySelection.title" = "Category";
+"categorySelection.placeholder" = "Habits and events can be\ngrouped by meaning";
+"categorySelection.addButton" = "Add category";
+"categorySelection.deleteConfirmation" = "Are you sure this category is not needed?";
+
+// MARK: - Category Edit
+"categoryEdit.new.title" = "New category";
+"categoryEdit.edit.title" = "Edit category";
+"categoryEdit.namePlaceholder" = "Enter category name";
+
+// MARK: - Schedule Selection
+"scheduleSelection.title" = "Schedule";
+
+// MARK: - Weekdays Full
+"weekday.sunday" = "Sunday";
+"weekday.monday" = "Monday";
+"weekday.tuesday" = "Tuesday";
+"weekday.wednesday" = "Wednesday";
+"weekday.thursday" = "Thursday";
+"weekday.friday" = "Friday";
+"weekday.saturday" = "Saturday";
+
+// MARK: - Weekdays Short
+"weekday.short.sunday" = "Sun";
+"weekday.short.monday" = "Mon";
+"weekday.short.tuesday" = "Tue";
+"weekday.short.wednesday" = "Wed";
+"weekday.short.thursday" = "Thu";
+"weekday.short.friday" = "Fri";
+"weekday.short.saturday" = "Sat";
+
+// MARK: - Onboarding
+"onboarding.page1" = "Track only\nwhat you want";
+"onboarding.page2" = "Even if it's not\nliters of water and yoga";
+"onboarding.button" = "That's some technology!";
+
+// MARK: - Filters
+"Filters.title" = "Filters";
+"filter.allTrackers" = "All trackers";
+"filter.today" = "Trackers for today";
+"filter.completed" = "Completed";
+"filter.uncompleted" = "Not completed";
+"trackersList.filterEmptyState" = "Nothing found";
+
+// MARK: - Statistics
+"Statistics.title" = "Statistics";
+"Statistics.placeholder" = "There is nothing to analyze yet";
+"Statistics.bestPeriod" = "Best period";
+"Statistics.perfectDays" = "Perfect days";
+"Statistics.completedTrackers" = "Trackers completed";
+"Statistics.averageValue" = "Average value";

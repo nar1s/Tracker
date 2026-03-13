@@ -18,8 +18,8 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
     }
 
     private lazy var pages: [UIViewController] = [
-        makePage(image: ._1, text: "Отслеживайте только\nто, что хотите"),
-        makePage(image: ._2, text: "Даже если это\nне литры воды и йога")
+        makePage(image: ._1, text: NSLocalizedString("onboarding.page1", comment: "")),
+        makePage(image: ._2, text: NSLocalizedString("onboarding.page2", comment: ""))
     ]
 
     private lazy var pageControl: UIPageControl = {
@@ -34,7 +34,7 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
 
     private lazy var skipButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(NSLocalizedString("onboarding.button", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypBlack)

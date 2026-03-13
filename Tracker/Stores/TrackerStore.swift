@@ -21,6 +21,7 @@ final class TrackerStore: NSObject {
         static let schedule = "schedule"
         static let createdAt = "createdAt"
         static let category = "category"
+        static let isPinned = "isPinned"
     }
     
     private enum CategoryEntity {
@@ -68,7 +69,6 @@ final class TrackerStore: NSObject {
     
     // MARK: - Public Methods
     
-    /// Получает все категории с трекерами
     func fetchAll() -> [TrackerCategory] {
         categoryStore.fetchAllCategoryObjects().map { categoryObject in
             let name = (categoryObject.value(forKey: CategoryEntity.name) as? String) ?? ""
@@ -81,7 +81,6 @@ final class TrackerStore: NSObject {
         }
     }
     
-    /// Добавляет новый трекер в категорию
     func add(_ tracker: Tracker, toCategoryWithName categoryName: String) throws {
         let categoryObject = try categoryStore.fetchOrCreateCategory(withName: categoryName)
         let trackerObject = try fetchTrackerObject(by: tracker.id, in: context)
@@ -93,9 +92,12 @@ final class TrackerStore: NSObject {
         trackerObject.setValue(tracker.color, forKey: TrackerEntity.color)
         trackerObject.setValue(tracker.createdAt, forKey: TrackerEntity.createdAt)
         trackerObject.setValue(categoryObject, forKey: TrackerEntity.category)
+        trackerObject.setValue(tracker.isPinned, forKey: TrackerEntity.isPinned)
         
         if let schedule = tracker.schedule {
             trackerObject.setValue(try encodeSchedule(schedule), forKey: TrackerEntity.schedule)
+        } else {
+            trackerObject.setValue(nil, forKey: TrackerEntity.schedule)
         }
         
         saveContext()
@@ -106,6 +108,27 @@ final class TrackerStore: NSObject {
         let trackerObjects = try context.fetch(request)
         
         return trackerObjects.compactMap { mapTracker(from: $0) }
+    }
+    
+    func togglePin(trackerId: UUID) throws {
+        guard let trackerObject = try fetchTrackerObject(by: trackerId, in: context) else { return }
+        let currentPinned = trackerObject.value(forKey: TrackerEntity.isPinned) as? Bool ?? false
+        trackerObject.setValue(!currentPinned, forKey: TrackerEntity.isPinned)
+        saveContext()
+    }
+    
+    func deleteTracker(trackerId: UUID) throws {
+        guard let trackerObject = try fetchTrackerObject(by: trackerId, in: context) else { return }
+        context.delete(trackerObject)
+        saveContext()
+    }
+    
+    func fetchCategoryName(for trackerId: UUID) -> String? {
+        guard let trackerObject = try? fetchTrackerObject(by: trackerId, in: context),
+              let categoryObject = trackerObject.value(forKey: TrackerEntity.category) as? NSManagedObject,
+              let categoryName = categoryObject.value(forKey: CategoryEntity.name) as? String
+        else { return nil }
+        return categoryName
     }
     
     // MARK: - Private Methods
@@ -148,13 +171,16 @@ final class TrackerStore: NSObject {
             schedule = try? decodeSchedule(from: scheduleData)
         }
         
+        let isPinned = trackerObject.value(forKey: TrackerEntity.isPinned) as? Bool ?? false
+        
         return Tracker(
             id: id,
             name: name,
             color: color,
             emoji: emoji,
             schedule: schedule,
-            createdAt: createdAt
+            createdAt: createdAt,
+            isPinned: isPinned
         )
     }
     

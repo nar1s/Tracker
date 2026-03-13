@@ -136,21 +136,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Private Methods
     
     private func formatDaysCount(_ count: Int) -> String {
-        let lastDigit = count % 10
-        let lastTwoDigits = count % 100
-        
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            return "\(count) дней"
-        }
-        
-        switch lastDigit {
-        case 1:
-            return "\(count) день"
-        case 2, 3, 4:
-            return "\(count) дня"
-        default:
-            return "\(count) дней"
-        }
+        String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: "Number of days"),
+            count
+        )
     }
     
     // MARK: - Actions

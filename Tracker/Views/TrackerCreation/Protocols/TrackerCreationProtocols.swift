@@ -15,8 +15,8 @@ enum TrackerType {
     
     var title: String {
         switch self {
-        case .habit: return "Новая привычка"
-        case .irregular: return "Новое нерегулярное событие"
+        case .habit: return NSLocalizedString("createTracker.habit.title", comment: "")
+        case .irregular: return NSLocalizedString("createTracker.irregular.title", comment: "")
         }
     }
 }

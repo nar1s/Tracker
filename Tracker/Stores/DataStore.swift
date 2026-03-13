@@ -61,4 +61,28 @@ final class DataStore {
     func getCompletionCount(for trackerId: UUID) throws -> Int {
         return try recordStore.fetchCompletionCount(for: trackerId)
     }
+    
+    func togglePin(trackerId: UUID) throws {
+        try trackerStore.togglePin(trackerId: trackerId)
+    }
+    
+    func deleteTracker(trackerId: UUID) throws {
+        try trackerStore.deleteTracker(trackerId: trackerId)
+    }
+    
+    func updateTracker(_ tracker: Tracker, in categoryName: String) throws {
+        try trackerStore.add(tracker, toCategoryWithName: categoryName)
+    }
+    
+    func fetchCategoryName(for trackerId: UUID) -> String? {
+        return trackerStore.fetchCategoryName(for: trackerId)
+    }
+    
+    func fetchAllTrackers() throws -> [Tracker] {
+        return try trackerStore.fetchAllTrackers()
+    }
+    
+    func fetchAllRecords() throws -> [TrackerRecord] {
+        return try recordStore.fetchAllRecords()
+    }
 }

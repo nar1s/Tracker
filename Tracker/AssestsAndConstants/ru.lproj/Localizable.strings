@@ -1,0 +1,105 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Павел Кузнецов on 09.03.2026.
+  
+*/
+
+// MARK: - Common
+"common.cancel" = "Отменить";
+"common.delete" = "Удалить";
+"common.done" = "Готово";
+"common.create" = "Создать";
+"common.edit" = "Редактировать";
+"common.search" = "Поиск";
+"common.error" = "Ошибка";
+"common.ok" = "OK";
+
+// MARK: - Tab Bar
+"tabBar.trackers" = "Трекеры";
+"tabBar.statistics" = "Статистика";
+
+// MARK: - Trackers List
+"trackersList.title" = "Трекеры";
+"trackersList.emptyState" = "Что будем отслеживать?";
+"trackersList.deleteConfirmation" = "Уверены что хотите удалить трекер?";
+"trackersList.pinned" = "Закрепленные";
+"trackersList.pin" = "Закрепить";
+"trackersList.unpin" = "Открепить";
+"trackersList.searchEmptyState" = "Ничего не найдено";
+"trackersList.filter" = "Фильтры";
+
+// MARK: - New Tracker
+"newTracker.title" = "Создание трекера";
+"newTracker.habit" = "Привычка";
+"newTracker.irregularEvent" = "Нерегулярное событие";
+
+// MARK: - Common (continued)
+"common.save" = "Сохранить";
+
+// MARK: - Create Tracker
+"createTracker.habit.title" = "Новая привычка";
+"createTracker.irregular.title" = "Новое нерегулярное событие";
+"createTracker.edit.title" = "Редактирование привычки";
+"createTracker.namePlaceholder" = "Введите название трекера";
+"createTracker.nameLengthError" = "Ограничение 38 символов";
+"createTracker.category" = "Категория";
+"createTracker.schedule" = "Расписание";
+"createTracker.emoji" = "Emoji";
+"createTracker.color" = "Цвет";
+"createTracker.everyDay" = "Каждый день";
+"createTracker.error" = "Не удалось создать трекер: %@";
+
+// MARK: - Category Selection
+"categorySelection.title" = "Категория";
+"categorySelection.placeholder" = "Привычки и события можно\nобъединить по смыслу";
+"categorySelection.addButton" = "Добавить категорию";
+"categorySelection.deleteConfirmation" = "Эта категория точно не нужна?";
+
+// MARK: - Category Edit
+"categoryEdit.new.title" = "Новая категория";
+"categoryEdit.edit.title" = "Редактирование категории";
+"categoryEdit.namePlaceholder" = "Введите название категории";
+
+// MARK: - Schedule Selection
+"scheduleSelection.title" = "Расписание";
+
+// MARK: - Weekdays Full
+"weekday.sunday" = "Воскресенье";
+"weekday.monday" = "Понедельник";
+"weekday.tuesday" = "Вторник";
+"weekday.wednesday" = "Среда";
+"weekday.thursday" = "Четверг";
+"weekday.friday" = "Пятница";
+"weekday.saturday" = "Суббота";
+
+// MARK: - Weekdays Short
+"weekday.short.sunday" = "Вс";
+"weekday.short.monday" = "Пн";
+"weekday.short.tuesday" = "Вт";
+"weekday.short.wednesday" = "Ср";
+"weekday.short.thursday" = "Чт";
+"weekday.short.friday" = "Пт";
+"weekday.short.saturday" = "Сб";
+
+// MARK: - Onboarding
+"onboarding.page1" = "Отслеживайте только\nто, что хотите";
+"onboarding.page2" = "Даже если это\nне литры воды и йога";
+"onboarding.button" = "Вот это технологии!";
+
+// MARK: - Filters
+"Filters.title" = "Фильтры";
+"filter.allTrackers" = "Все трекеры";
+"filter.today" = "Трекеры на сегодня";
+"filter.completed" = "Завершенные";
+"filter.uncompleted" = "Не завершенные";
+"trackersList.filterEmptyState" = "Ничего не найдено";
+
+// MARK: - Statistics
+"Statistics.title" = "Статистика";
+"Statistics.placeholder" = "Анализировать пока нечего";
+"Statistics.bestPeriod" = "Лучший период";
+"Statistics.perfectDays" = "Идеальные дни";
+"Statistics.completedTrackers" = "Трекеров завершено";
+"Statistics.averageValue" = "Среднее значение";

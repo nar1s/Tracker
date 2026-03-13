@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import AppMetricaCore
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -21,6 +22,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         sceneConfiguration.delegateClass = SceneDelegate.self
         return sceneConfiguration
+    }
+    
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if let configuration = AppMetricaConfiguration(apiKey: "2dea51e7-7bdc-42b7-ae61-c457a9d5aba0") {
+            AppMetrica.activate(with: configuration)
+        }
+            
+        return true
     }
     
     lazy var persistentContainer: NSPersistentContainer = {

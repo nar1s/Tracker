@@ -13,6 +13,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private let trackerType: TrackerType
     private let dataStore: DataStore
+    private let editingTracker: Tracker?
+    private let editingCategory: String?
     
     private var trackerName: String = "" {
         didSet { updateCreateButtonState() }
@@ -62,8 +64,8 @@ final class CreateTrackerViewController: UIViewController {
         
         var title: String {
             switch self {
-            case .category: return "Категория"
-            case .schedule: return "Расписание"
+            case .category: return NSLocalizedString("createTracker.category", comment: "")
+            case .schedule: return NSLocalizedString("createTracker.schedule", comment: "")
             }
         }
     }
@@ -90,7 +92,9 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = trackerType.title
+        label.text = editingTracker != nil
+            ? NSLocalizedString("createTracker.edit.title", comment: "")
+            : trackerType.title
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
@@ -98,9 +102,19 @@ final class CreateTrackerViewController: UIViewController {
         return label
     }()
     
+    private lazy var daysCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+        label.textColor = UIColor(resource: .ypBlack)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+    
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("createTracker.namePlaceholder", comment: "")
         textField.font = .systemFont(ofSize: 17, weight: .regular)
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.layer.cornerRadius = 16
@@ -122,7 +136,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let errorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Ограничение 38 символов"
+        label.text = NSLocalizedString("createTracker.nameLengthError", comment: "")
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textColor = UIColor(resource: .ypRed)
         label.textAlignment = .center
@@ -148,7 +162,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let emojiLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emoji"
+        label.text = NSLocalizedString("createTracker.emoji", comment: "")
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = UIColor(resource: .ypBlack)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -188,7 +202,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private let colorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = NSLocalizedString("createTracker.color", comment: "")
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = UIColor(resource: .ypBlack)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -228,7 +242,7 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("common.cancel", comment: ""), for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypRed), for: .normal)
         button.backgroundColor = UIColor(resource: .ypWhite)
@@ -243,7 +257,10 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        let buttonTitle = editingTracker != nil
+            ? NSLocalizedString("common.save", comment: "")
+            : NSLocalizedString("common.create", comment: "")
+        button.setTitle(buttonTitle, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
@@ -266,9 +283,11 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(trackerType: TrackerType, dataStore: DataStore = .shared) {
+    init(trackerType: TrackerType, dataStore: DataStore = .shared, editingTracker: Tracker? = nil, editingCategory: String? = nil) {
         self.trackerType = trackerType
         self.dataStore = dataStore
+        self.editingTracker = editingTracker
+        self.editingCategory = editingCategory
         self.selectedColor = ""
         self.selectedEmoji = ""
         super.init(nibName: nil, bundle: nil)
@@ -285,6 +304,10 @@ final class CreateTrackerViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupKeyboardObservers()
+        
+        if let tracker = editingTracker {
+            prefillForEditing(tracker)
+        }
     }
     
     deinit {
@@ -309,6 +332,7 @@ final class CreateTrackerViewController: UIViewController {
         let tableHeight: CGFloat = CGFloat(settingsRows.count * 75)
         
         let stackView = UIStackView(arrangedSubviews: [
+            daysCountLabel,
             nameTextField,
             errorLabel,
             settingsTableView,
@@ -320,6 +344,7 @@ final class CreateTrackerViewController: UIViewController {
         stackView.axis = .vertical
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
+        stackView.setCustomSpacing(40, after: daysCountLabel)
         stackView.setCustomSpacing(24, after: nameTextField)
         stackView.setCustomSpacing(0, after: errorLabel)
         stackView.setCustomSpacing(32, after: settingsTableView)
@@ -413,23 +438,35 @@ final class CreateTrackerViewController: UIViewController {
         guard isFormValid else { return }
         
         let schedule: Schedule? = trackerType == .habit ? Schedule(weekdays: selectedSchedule) : nil
+        let trackerId = editingTracker?.id ?? UUID()
+        let isPinned = editingTracker?.isPinned ?? false
         
         let tracker = Tracker(
-            id: UUID(),
+            id: trackerId,
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            schedule: schedule
+            schedule: schedule,
+            isPinned: isPinned
         )
         
         do {
-            try dataStore.addTracker(tracker, to: selectedCategory)
+            if editingTracker != nil {
+                try dataStore.updateTracker(tracker, in: selectedCategory)
+            } else {
+                try dataStore.addTracker(tracker, to: selectedCategory)
+            }
             
-            view.window?.rootViewController?.dismiss(animated: true) {
-                self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+            if editingTracker != nil {
+                dismiss(animated: true) {
+                    self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+                }
+            } else {
+                view.window?.rootViewController?.dismiss(animated: true) {
+                    self.delegate?.didCreateTracker(tracker, category: self.selectedCategory)
+                }
             }
         } catch {
-            // Показываем ошибку пользователю
             showError(error)
         }
     }
@@ -514,7 +551,7 @@ final class CreateTrackerViewController: UIViewController {
         guard !selectedSchedule.isEmpty else { return nil }
         
         if selectedSchedule.count == 7 {
-            return "Каждый день"
+            return NSLocalizedString("createTracker.everyDay", comment: "")
         }
         
         let sortedDays = selectedSchedule.sorted { $0.rawValue < $1.rawValue }
@@ -523,12 +560,39 @@ final class CreateTrackerViewController: UIViewController {
     
     private func showError(_ error: Error) {
         let alert = UIAlertController(
-            title: "Ошибка",
-            message: "Не удалось создать трекер: \(error.localizedDescription)",
+            title: NSLocalizedString("common.error", comment: ""),
+            message: String(format: NSLocalizedString("createTracker.error", comment: ""), error.localizedDescription),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("common.ok", comment: ""), style: .default))
         present(alert, animated: true)
+    }
+    
+    private func prefillForEditing(_ tracker: Tracker) {
+        trackerName = tracker.name
+        nameTextField.text = tracker.name
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        
+        if let category = editingCategory {
+            selectedCategory = category
+        }
+        
+        if let schedule = tracker.schedule {
+            selectedSchedule = schedule.weekdays
+        }
+        
+        let completedDays = (try? dataStore.getCompletionCount(for: tracker.id)) ?? 0
+        daysCountLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("daysCount", comment: ""),
+            completedDays
+        )
+        daysCountLabel.isHidden = false
+        
+        emojiCollectionView.reloadData()
+        colorCollectionView.reloadData()
+        settingsTableView.reloadData()
+        updateCreateButtonState()
     }
 }
 
